@@ -25,7 +25,7 @@
             android:text="文字飞出"
             android:layout_height="wrap_content" />
     </LinearLayout>
-    <com.wenhuaijun.keywordsflowdemo.KeywordsFlowView
+    <com.txt.flow.KeywordsFlowView
         android:id="@+id/keywordsFlowView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
