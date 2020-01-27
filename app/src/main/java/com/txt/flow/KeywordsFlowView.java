@@ -7,19 +7,13 @@ import android.view.VelocityTracker;
 
 import java.util.Random;
 
-/**
- * Created by Administrator on 2016/2/24 0024.
- */
 public class KeywordsFlowView extends KeywordsFlow {
-    //手势滑动
-    public static final int SNAP_VELOCITY = 50;
+    public static final int SNAP_VELOCITY = 50;   // 手势滑动
+    float yMove;
     private float yDown;
-    private float yMove;
-    private float yUp;
     private String[] words;
-    private boolean shouldScroolFlow = true;
-    //用于计算手指滑动的速度。
-    private VelocityTracker mVelocityTracker;
+    private boolean shouldScrollFlow = true;
+    private VelocityTracker mVelocityTracker;  // 用于计算手指滑动的速度。
 
     public KeywordsFlowView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -57,25 +51,33 @@ public class KeywordsFlowView extends KeywordsFlow {
         MAX = size;
     }
 
-    public void shouldScroolFlow(boolean shouldScroolFlow) {
-        this.shouldScroolFlow = shouldScroolFlow;
+    public void shouldScrollFlow(boolean shouldScrollFlow) {
+        this.shouldScrollFlow = shouldScrollFlow;
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!shouldScroolFlow) {
+        if (!shouldScrollFlow) {
             return super.onTouchEvent(event);
         }
         createVelocityTracker(event);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                performClick();
                 yDown = event.getRawY();
                 break;
             case MotionEvent.ACTION_MOVE:
+                performClick();
                 yMove = event.getRawY();
                 break;
             case MotionEvent.ACTION_UP:
-                yUp = event.getRawY();
+                performClick();
+                float yUp = event.getRawY();
                 float distance = yUp - yDown;
                 if (distance < -100 && getScrollVelocity() > SNAP_VELOCITY) {
                     rubKeywords();
@@ -87,7 +89,6 @@ public class KeywordsFlowView extends KeywordsFlow {
                     go2Show(KeywordsFlow.ANIMATION_IN);
                 }
                 break;
-
         }
         return true;
     }

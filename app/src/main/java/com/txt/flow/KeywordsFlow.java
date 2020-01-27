@@ -28,50 +28,37 @@ public class KeywordsFlow extends FrameLayout implements OnGlobalLayoutListener 
     public static final int IDX_Y = 1;
     public static final int IDX_TXT_LENGTH = 2;
     public static final int IDX_DIS_Y = 3;
-    /**
-     * 由外至内的动画。
-     */
-    public static final int ANIMATION_IN = 1;
-    /**
-     * 由内至外的动画。
-     */
-    public static final int ANIMATION_OUT = 2;
-    /**
-     * 位移动画类型：从外围移动到坐标点。
-     */
-    public static final int OUTSIDE_TO_LOCATION = 1;
-    /**
-     * 位移动画类型：从坐标点移动到外围。
-     */
-    public static final int LOCATION_TO_OUTSIDE = 2;
-    /**
-     * 位移动画类型：从中心点移动到坐标点。
-     */
-    public static final int CENTER_TO_LOCATION = 3;
-    /**
-     * 位移动画类型：从坐标点移动到中心点。
-     */
-    public static final int LOCATION_TO_CENTER = 4;
-    public static final long ANIM_DURATION = 800l;
+
+    public static final int ANIMATION_IN = 1;  // 由外至内的动画
+    public static final int ANIMATION_OUT = 2; // 由内至外的动画
+
+    /* 位移动画类型 */
+    public static final int OUTSIDE_TO_LOCATION = 1; // 从外围移动到坐标点
+    public static final int LOCATION_TO_OUTSIDE = 2; // 从坐标点移动到外围
+    public static final int CENTER_TO_LOCATION = 3;  // 从中心点移动到坐标点
+    public static final int LOCATION_TO_CENTER = 4;  // 从坐标点移动到中心点
+
+    public static final long ANIM_DURATION = 800L;
     public static final int TEXT_SIZE_MAX = 25;
     public static final int TEXT_SIZE_MIN = 15;
     public static int MAX = 10;
     private static Interpolator interpolator;
     private static AlphaAnimation animAlpha2Opaque;
     private static AlphaAnimation animAlpha2Transparent;
-    private static ScaleAnimation animScaleLarge2Normal, animScaleNormal2Large, animScaleZero2Normal,
-            animScaleNormal2Zero;
+
+    private static ScaleAnimation animScaleLarge2Normal;
+    private static ScaleAnimation animScaleNormal2Large;
+    private static ScaleAnimation animScaleZero2Normal;
+    private static ScaleAnimation animScaleNormal2Zero;
+
     private OnClickListener itemClickListener;
-    /**
-     * 存储显示的关键字。
-     */
-    private Vector<String> vecKeywords;
+    private Vector<String> vecKeywords; // 存储显示的关键字
     private int width, height;
     /**
-     * go2Show()中被赋值为true，标识开发人员触发其开始动画显示。<br/>
-     * 本标识的作用是防止在填充keywrods未完成的过程中获取到width和height后提前启动动画。<br/>
-     * 在show()方法中其被赋值为false。<br/>
-     * 真正能够动画显示的另一必要条件：width 和 height不为0。<br/>
+     * go2Show()中被赋值为true，标识开发人员触发其开始动画显示。
+     * 本标识的作用是防止在填充keywrods未完成的过程中获取到width和height后提前启动动画。
+     * 在show()方法中其被赋值为false。
+     * 真正能够动画显示的另一必要条件：width 和 height不为0。
      */
     private boolean enableShow;
     private Random random;
@@ -131,21 +118,19 @@ public class KeywordsFlow extends FrameLayout implements OnGlobalLayoutListener 
         animDuration = duration;
     }
 
-    public boolean feedKeyword(String keyword) {
-        boolean result = false;
+    public void feedKeyword(String keyword) {
         if (vecKeywords.size() < MAX) {
-            result = vecKeywords.add(keyword);
+            vecKeywords.add(keyword);
         }
-        return result;
     }
 
     /**
-     * 开始动画显示。<br/>
-     * 之前已经存在的TextView将会显示退出动画。<br/>
+     * 开始动画显示。
+     * 之前已经存在的TextView将会显示退出动画。
      *
-     * @return 正常显示动画返回true；反之为false。返回false原因如下：<br/>
-     * 1.时间上不允许，受lastStartAnimationTime的制约；<br/>
-     * 2.未获取到width和height的值。<br/>
+     * @return 正常显示动画返回true；反之为false。返回false原因如下：
+     * 1.时间上不允许，受lastStartAnimationTime的制约；
+     * 2.未获取到width和height的值。
      */
     public boolean go2Show(int animType) {
         if (System.currentTimeMillis() - lastStartAnimationTime > animDuration) {
@@ -277,8 +262,8 @@ public class KeywordsFlow extends FrameLayout implements OnGlobalLayoutListener 
             // + iXY[IDX_DIS_Y]);  
             // 第二次修正:修正y坐标  
             int yDistance = iXY[IDX_Y] - yCenter;
-            // 对于最靠近中心点的，其值不会大于yItem<br/>  
-            // 对于可以一路下降到中心点的，则该值也是其应调整的大小<br/>  
+            // 对于最靠近中心点的，其值不会大于yItem
+            // 对于可以一路下降到中心点的，则该值也是其应调整的大小
             int yMove = Math.abs(yDistance);
             inner:
             for (int k = i - 1; k >= 0; k--) {
@@ -429,11 +414,4 @@ public class KeywordsFlow extends FrameLayout implements OnGlobalLayoutListener 
         itemClickListener = listener;
     }
 
-    // public void onDraw(Canvas canvas) {  
-    // super.onDraw(canvas);  
-    // Paint p = new Paint();  
-    // p.setColor(Color.BLACK);  
-    // canvas.drawCircle((width >> 1) - 2, (height >> 1) - 2, 4, p);  
-    // p.setColor(Color.RED);  
-    // }  
 }

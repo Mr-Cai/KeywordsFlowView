@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">文字飞入</string>
+    <string name="in">文字飞入</string>
+    <string name="out">文字飞出</string>
 </resources>

@@ -1,34 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/containerF"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:id="@+id/btn_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        >
-        <Button
-            android:id="@+id/flow_in"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:text="文字飞入"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/flow_out"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:text="文字飞出"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
     <com.txt.flow.KeywordsFlowView
         android:id="@+id/keywordsFlowView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/btn_layout"
-        />
-</RelativeLayout>
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/flowOutBTN"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/flowInBTN"
+        android:layout_width="206dp"
+        android:layout_height="wrap_content"
+        android:text="@string/in"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/flowOutBTN"
+        android:layout_width="206dp"
+        android:layout_height="wrap_content"
+        android:text="@string/out"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
