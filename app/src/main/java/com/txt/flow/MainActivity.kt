@@ -12,7 +12,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        keywordsFlowView.setTextShowSize(15)   // 设置每次随机飞入文字的个数
+        keywordsFlowView.setTextShowSize(25)   // 设置每次随机飞入文字的个数
         keywordsFlowView.shouldScrollFlow(true)  // 设置是否允许滑动屏幕切换文字
         keywordsFlowView.show(keywords, KeywordsFlow.ANIMATION_IN)  // 开始展示
 

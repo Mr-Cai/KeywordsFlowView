@@ -10,6 +10,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.animation.*
 import android.view.animation.Animation.AnimationListener
 import android.widget.FrameLayout
+import android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
 import android.widget.TextView
 import java.util.*
 import kotlin.math.abs
@@ -20,22 +21,21 @@ open class KeywordsFlow @JvmOverloads constructor(
     attrs: AttributeSet,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr), OnGlobalLayoutListener {
-    private var itemClickListener: OnClickListener? = null
-    private var vecKeywords: Vector<String>? = null  // 存储显示的关键字
+    private lateinit var itemClickListener: OnClickListener
+    private var vecKeywords: Vector<String>  // 存储显示的关键字
     private var width: Int? = 0
     private var height: Int? = 0
-
     /**
-     * @see go2Show()中被赋值为true，标识开发人员触发其开始动画显示。
-     * 本标识的作用是防止在填充关键词未完成的过程中获取到width和height后提前启动动画。
-     * @see show()方法中其被赋值为false。
-     * 真正能够动画显示的另一必要条件：
-     * @see width  和
-     * @see height 不为0
+     * @see go2Show()中被赋值为true, 标识开发人员触发其开始动画显示
+     * @see width
+     * @see height
+     * 本标识的作用是防止在填充关键词未完成的过程中获取到width和height后提前启动动画
+     * @see show()方法中其被赋值为false
+     * 真正能够动画显示的另一必要条件: width和height不为0
      */
     private var enableShow = false
-
     private var random: Random? = null
+
     /**
      * @see ANIMATION_IN
      * @see ANIMATION_OUT
@@ -54,49 +54,56 @@ open class KeywordsFlow @JvmOverloads constructor(
         duration = ANIM_DURATION
         random = Random()
         vecKeywords = Vector(MAX)
-        viewTreeObserver.addOnGlobalLayoutListener(this)
-        interpolator =
-            AnimationUtils.loadInterpolator(context, android.R.anim.decelerate_interpolator)
-        animAlpha2Opaque = AlphaAnimation(0.0f, 1.0f)
-        animAlpha2Transparent = AlphaAnimation(1.0f, 0.0f)
+        globalListener()
+        interpolator = AnimationUtils
+            .loadInterpolator(context, android.R.anim.decelerate_interpolator)
+        animAlpha2Opaque = AlphaAnimation(0.0F, 1.0F)
+        animAlpha2Transparent = AlphaAnimation(1.0F, 0.0F)
         animScaleLarge2Normal = ScaleAnimation(2.0F, 1.0F, 2.0F, 1.0F)
         animScaleNormal2Large = ScaleAnimation(1.0F, 2.0F, 1.0F, 2.0F)
         animScaleZero2Normal = ScaleAnimation(0F, 1.0F, 0F, 1.0F)
         animScaleNormal2Zero = ScaleAnimation(1.0F, 0F, 1.0F, 0F)
     }
 
+    private fun globalListener() = viewTreeObserver.addOnGlobalLayoutListener(this)
+
     fun feedKeyword(keyword: String) {
-        if (vecKeywords!!.size < MAX) {
-            vecKeywords!!.add(keyword)
-        }
+        if (vecKeywords.size < MAX) vecKeywords.add(keyword)
     }
 
     /**
-     * 开始动画显示。
-     * 之前已经存在的TextView将会显示退出动画。
+     * 开始动画显示
+     * 之前已经存在的TextView将会显示退出动画
      */
     fun go2Show(animType: Int) {
-        if (System.currentTimeMillis() - lastStartAnimationTime > duration) {
-            enableShow = true
-            if (animType == ANIMATION_IN) {
-                txtAnimInType = OUTSIDE_TO_LOCATION
-                txtAnimOutType = LOCATION_TO_CENTER
-            } else if (animType == ANIMATION_OUT) {
-                txtAnimInType = CENTER_TO_LOCATION
-                txtAnimOutType = LOCATION_TO_OUTSIDE
+        when {
+            System.currentTimeMillis() - lastStartAnimationTime > duration -> {
+                enableShow = true
+                when (animType) {
+                    ANIMATION_IN -> {
+                        txtAnimInType = OUTSIDE_TO_LOCATION
+                        txtAnimOutType = LOCATION_TO_CENTER
+                    }
+                    ANIMATION_OUT -> {
+                        txtAnimInType = CENTER_TO_LOCATION
+                        txtAnimOutType = LOCATION_TO_OUTSIDE
+                    }
+                }
+                disappear()
+                show()
             }
-            disappear()
-            show()
         }
     }
 
     private fun disappear() {
         val size = childCount
-        for (i in size - 1 downTo 0) {
+        loop@ for (i in size - 1 downTo 0) {
             val txt = getChildAt(i) as TextView
-            if (txt.visibility == View.GONE) {
-                removeView(txt)
-                continue
+            when (txt.visibility) {
+                View.GONE -> {
+                    removeView(txt)
+                    continue@loop
+                }
             }
             val layParams = txt.layoutParams as LayoutParams
             val xy = intArrayOf(layParams.leftMargin, layParams.topMargin, txt.width)
@@ -115,33 +122,32 @@ open class KeywordsFlow @JvmOverloads constructor(
     }
 
     private fun show(): Boolean {
-        if (width!! > 0 && height!! > 0 && vecKeywords != null && vecKeywords!!.size > 0 && enableShow) {
+        if (width!! > 0 && height!! > 0 && vecKeywords.size > 0 && enableShow) {
             enableShow = false
             lastStartAnimationTime = System.currentTimeMillis()
             // 找到中心点
             val xCenter = width!! shr 1
             val yCenter = height!! shr 1
-            // 关键字的个数。
-            val size = vecKeywords!!.size
+            // 关键字的个数
+            val size = vecKeywords.size
             val xItem = width!! / size
             val yItem = height!! / size
             val listX = LinkedList<Int>()
             val listY = LinkedList<Int>()
-            for (i in 0 until size) { // 准备随机候选数，分别对应x/y轴位置
+            for (i in 0 until size) { // 准备随机候选数, 分别对应x/y轴位置
                 listX.add(i * xItem)
                 listY.add(i * yItem + (yItem shr 2))
             }
             val listTxtTop = LinkedList<TextView>()
             val listTxtBottom = LinkedList<TextView>()
             for (i in 0 until size) {
-                val keyword = vecKeywords!![i]
+                val keyword = vecKeywords[i]
                 // 随机颜色
                 val ranColor = -0x1000000 or random!!.nextInt(0x0077ffff)
-                // 随机位置，糙值
+                // 随机位置, 糙值
                 val xy = randomXY(random, listX, listY)
                 // 随机字体大小
-                val txtSize =
-                    TEXT_SIZE_MIN + random!!.nextInt(TEXT_SIZE_MAX - TEXT_SIZE_MIN + 1)
+                val txtSize = TEXT_SIZE_MIN + random!!.nextInt(TEXT_SIZE_MAX - TEXT_SIZE_MIN + 1)
                 // 实例化TextView
                 val txt = TextView(context)
                 txt.setOnClickListener(itemClickListener)
@@ -154,23 +160,22 @@ open class KeywordsFlow @JvmOverloads constructor(
                 val paint: Paint = txt.paint
                 val strWidth = ceil(paint.measureText(keyword).toDouble()).toInt()
                 xy[IDX_TXT_LENGTH] = strWidth
-                // 第一次修正:修正x坐标
-                if (xy[IDX_X] + strWidth > width!! - (xItem shr 1)) {
-                    val baseX = width!! - strWidth
-                    // 减少文本右边缘一样的概率
-                    xy[IDX_X] =
-                        baseX - xItem + random!!.nextInt(xItem shr 1)
-                } else if (xy[IDX_X] == 0) { // 减少文本左边缘一样的概率
-                    xy[IDX_X] =
-                        random!!.nextInt(xItem).coerceAtLeast(xItem / 3)
+                // 第一次修正: 修正x坐标
+                when {
+                    xy[IDX_X] + strWidth > width!! - (xItem shr 1) -> {
+                        val baseX = width!! - strWidth
+                        // 减少文本右边缘重复的概率
+                        xy[IDX_X] = baseX - xItem + random!!.nextInt(xItem shr 1)
+                    }
+                    xy[IDX_X] == 0 -> { // 减少文本左边缘重复的概率
+                        xy[IDX_X] = random!!.nextInt(xItem).coerceAtLeast(xItem / 3)
+                    }
                 }
-                xy[IDX_DIS_Y] =
-                    abs(xy[IDX_Y] - yCenter)
+                xy[IDX_DIS_Y] = abs(xy[IDX_Y] - yCenter)
                 txt.tag = xy
-                if (xy[IDX_Y] > yCenter) {
-                    listTxtBottom.add(txt)
-                } else {
-                    listTxtTop.add(txt)
+                when {
+                    xy[IDX_Y] > yCenter -> listTxtBottom.add(txt)
+                    else -> listTxtTop.add(txt)
                 }
             }
             attach2Screen(listTxtTop, xCenter, yCenter, yItem)
@@ -180,9 +185,7 @@ open class KeywordsFlow @JvmOverloads constructor(
         return false
     }
 
-    /**
-     * 修正TextView的Y坐标将将其添加到容器上。
-     */
+    // 修正TextView的Y坐标将将其添加到容器上
     private fun attach2Screen(
         listTxt: LinkedList<TextView>,
         xCenter: Int,
@@ -194,37 +197,21 @@ open class KeywordsFlow @JvmOverloads constructor(
         for (i in 0 until size) {
             val txt = listTxt[i]
             val iXY = txt.tag as IntArray
-            // Log.d("ANDROID_LAB", "fix[  " + txt.getText() + "  ] x:" +
-// iXY[IDX_X] + " y:" + iXY[IDX_Y] + " r2="
-// + iXY[IDX_DIS_Y]);
-// 第二次修正:修正y坐标
             val yDistance = iXY[IDX_Y] - yCenter
-            // 对于最靠近中心点的，其值不会大于yItem
-// 对于可以一路下降到中心点的，则该值也是其应调整的大小
+            // 对于最靠近中心点的, 其值不会大于yItem, 对于可以一路下降到中心点的, 则该值也是其应调整的大小
             var yMove = abs(yDistance)
             for (k in i - 1 downTo 0) {
                 val kXY = listTxt[k].tag as IntArray
                 val startX = kXY[IDX_X]
                 val endX = startX + kXY[IDX_TXT_LENGTH]
-                // y轴以中心点为分隔线，在同一侧
-                if (yDistance * (kXY[IDX_Y] - yCenter) > 0) { // Log.d("ANDROID_LAB", "compare:" +
-// listTxt.get(k).getText());
-                    if (isXMixed(
-                            startX,
-                            endX,
-                            iXY[IDX_X],
-                            iXY[IDX_X] + iXY[IDX_TXT_LENGTH]
-                        )
-                    ) {
-                        val tmpMove = abs(
-                            iXY[IDX_Y] - kXY[IDX_Y]
-                        )
-                        if (tmpMove > yItem) {
-                            yMove = tmpMove
-                        } else if (yMove > 0) { // 取消默认值。
-                            yMove = 0
+                // y轴以中心点为分隔线, 在同一侧
+                if (yDistance * (kXY[IDX_Y] - yCenter) > 0) {
+                    if (isXMixed(startX, endX, iXY[IDX_X], iXY[IDX_X] + iXY[IDX_TXT_LENGTH])) {
+                        val tmpMove = abs(iXY[IDX_Y] - kXY[IDX_Y])
+                        when {
+                            tmpMove > yItem -> yMove = tmpMove
+                            yMove > 0 -> yMove = 0  // 取消默认值
                         }
-                        // Log.d("ANDROID_LAB", "break");
                         break
                     }
                 }
@@ -232,27 +219,17 @@ open class KeywordsFlow @JvmOverloads constructor(
             if (yMove > yItem) {
                 val maxMove = yMove - yItem
                 val randomMove = random!!.nextInt(maxMove)
-                val realMove =
-                    randomMove.coerceAtLeast(maxMove shr 1) * yDistance / abs(
-                        yDistance
-                    )
-                iXY[IDX_Y] =
-                    iXY[IDX_Y] - realMove
-                iXY[IDX_DIS_Y] =
-                    abs(iXY[IDX_Y] - yCenter)
-                // 已经调整过前i个需要再次排序
-                sortXYList(listTxt, i + 1)
+                val realMove = randomMove.coerceAtLeast(maxMove shr 1) * yDistance / abs(yDistance)
+                iXY[IDX_Y] = iXY[IDX_Y] - realMove
+                iXY[IDX_DIS_Y] = abs(iXY[IDX_Y] - yCenter)
+                sortXYList(listTxt, i + 1)  // 已经调整过前i个需要再次排序
             }
-            val layParams = LayoutParams(
-                LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT
-            )
+            val layParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
             layParams.gravity = Gravity.START or Gravity.TOP
             layParams.leftMargin = iXY[IDX_X]
             layParams.topMargin = iXY[IDX_Y]
             addView(txt, layParams)
-            // 动画
-            val animSet = getAnimationSet(iXY, xCenter, yCenter, txtAnimInType)
+            val animSet = getAnimationSet(iXY, xCenter, yCenter, txtAnimInType)  // 动画
             txt.startAnimation(animSet)
         }
     }
@@ -311,14 +288,15 @@ open class KeywordsFlow @JvmOverloads constructor(
     }
 
     /**
-     * 根据与中心点的距离由近到远进行冒泡排序。
-     * @param endIdx  起始位置。
-     * @param listTxt 待排序的数组。
+     * 根据与中心点的距离由近到远进行冒泡排序
+     * @param endIdx  起始位置
+     * @param listTxt 待排序的数组
      */
     private fun sortXYList(listTxt: LinkedList<TextView>, endIdx: Int) {
         for (i in 0 until endIdx) {
             for (k in i + 1 until endIdx) {
-                if ((listTxt[k].tag as IntArray)[IDX_DIS_Y] < (listTxt[i].tag as IntArray)[IDX_DIS_Y]
+                if ((listTxt[k].tag as IntArray)[IDX_DIS_Y] <
+                    (listTxt[i].tag as IntArray)[IDX_DIS_Y]
                 ) {
                     val iTmp = listTxt[i]
                     val kTmp = listTxt[k]
@@ -363,11 +341,11 @@ open class KeywordsFlow @JvmOverloads constructor(
     }
 
     fun rubKeywords() {
-        vecKeywords!!.clear()
+        vecKeywords.clear()
     }
 
     fun setOnItemClickListener(listener: OnClickListener?) {
-        itemClickListener = listener
+        itemClickListener = listener!!
     }
 
     companion object {
@@ -377,6 +355,7 @@ open class KeywordsFlow @JvmOverloads constructor(
         const val IDX_DIS_Y = 3
         const val ANIMATION_IN = 1 // 由外至内的动画
         const val ANIMATION_OUT = 2 // 由内至外的动画
+
         /* 位移动画类型 */
         const val OUTSIDE_TO_LOCATION = 1 // 从外围移动到坐标点
         const val LOCATION_TO_OUTSIDE = 2 // 从坐标点移动到外围

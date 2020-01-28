@@ -12,8 +12,8 @@ class KeywordsFlowView @JvmOverloads constructor(
     attrs: AttributeSet,
     defStyleAttr: Int = 0
 ) : KeywordsFlow(context, attrs, defStyleAttr) {
-    private var yMove = 0f
-    private var yDown = 0f
+    private var yMove = 0F
+    private var yDown = 0F
     private lateinit var words: Array<String>
     private var shouldScrollFlow = true
     private var tracker: VelocityTracker? = null // 用于计算手指滑动的速度
@@ -39,9 +39,7 @@ class KeywordsFlowView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!shouldScrollFlow) {
-            return super.onTouchEvent(event)
-        }
+        if (!shouldScrollFlow) return super.onTouchEvent(event)
         createVelocityTracker(event)
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -56,14 +54,17 @@ class KeywordsFlowView @JvmOverloads constructor(
                 performClick()
                 val yUp = event.rawY
                 val distance = yUp - yDown
-                if (distance < -100 && scrollVelocity > SNAP_VELOCITY) {
-                    rubKeywords()
-                    feedKeywordsFlow(this, words)
-                    go2Show(ANIMATION_OUT)
-                } else if (distance > 30 && scrollVelocity > SNAP_VELOCITY) {
-                    rubKeywords()
-                    feedKeywordsFlow(this, words)
-                    go2Show(ANIMATION_IN)
+                when {
+                    distance < -100 && scrollVelocity > SNAP_VELOCITY -> {
+                        rubKeywords()
+                        feedKeywordsFlow(this, words)
+                        go2Show(ANIMATION_OUT)
+                    }
+                    distance > 30 && scrollVelocity > SNAP_VELOCITY -> {
+                        rubKeywords()
+                        feedKeywordsFlow(this, words)
+                        go2Show(ANIMATION_IN)
+                    }
                 }
             }
         }
@@ -71,9 +72,7 @@ class KeywordsFlowView @JvmOverloads constructor(
     }
 
     private fun createVelocityTracker(event: MotionEvent) {
-        if (tracker == null) {
-            tracker = VelocityTracker.obtain()
-        }
+        if (tracker == null) tracker = VelocityTracker.obtain()
         tracker!!.addMovement(event)
     }
 
@@ -99,6 +98,3 @@ class KeywordsFlowView @JvmOverloads constructor(
         }
     }
 }
-
-
-
